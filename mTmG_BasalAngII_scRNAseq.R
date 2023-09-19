@@ -7,38 +7,6 @@ library(dplyr)
 
 setwd("Z:/CT Surgery Lab/Yanming Li/mouse_scRNAseq/mTmG_basal_angII/")
 
-integrated <- readRDS("logNormalize_combined_mTmG_SalineAngII.rds")
-
-DimPlot(integrated, label = T, raster=T)
-integrated$Sample <- factor(integrated$Sample, levels=c("Saline.GFP", "Saline.RFP", "nonIMH.GFP", "nonIMH.RFP", "IMH.GFP", "IMH.RFP"))
-DimPlot(integrated, split.by = "Sample", raster = T)
-
-integrated$Lineage <- ifelse(integrated$Sample %in% c("Saline.GFP","nonIMH.GFP", "IMH.GFP"), "GFP", "RFP")
-
-meta <- integrated@meta.data
-meta <- meta %>% mutate(Group=case_when(
-  Sample %in% c("Saline.GFP", "Saline.RFP") ~ "Control",
-  Sample %in% c("nonIMH.GFP", "nonIMH.RFP") ~ "nonIMH",
-  Sample %in% c("IMH.GFP", "IMH.RFP") ~ "IMH"
-))
-integrated$Group <- meta$Group
-integrated$Group <- factor(integrated$Group, levels=c("Control","nonIMH","IMH"))
-
-integrated$SMC <- ifelse(integrated$seurat_clusters %in% c(1,3,4,6,7,8,9), "SMC", "Others")
-DimPlot(integrated, split.by = "orig.ident", group.by = "SMC", raster = T, cols = c("grey", "darkblue"))+NoLegend()
-
-integrated$SMC2 <- ifelse(integrated$seurat_clusters %in% c(1,3,4,6,7,8,9), 
-                          as.character(integrated$seurat_clusters), NA)
-integrated$SMC2 <- factor(integrated$SMC2, levels=c(1,3,4,6,7,8,9,NA))
-DimPlot(integrated, group.by = "SMC2", raster=T, label=T)
-DimPlot(integrated, group.by = "SMC2", raster=T, label=T, split.by = "Sample")
-
-FeaturePlot(integrated, features = c("Col1a2","Dcn", "S100a4","Pdgfra"), raster = T) #split.by = "Sample", 
-ggsave("Fig4_featurePlot_TFs_Sample.pdf", width = 16, height = 18)
-
-FeaturePlot(integrated, features = c("Nfia"), raster = T, split.by = "Sample") #, 
-ggsave("Fig4_featurePlot_TFs_Sample.pdf", width = 16, height = 18)
-
 ############################# separate analysis of each dataset ###############################
 setwd("Z:/CT Surgery Lab/Yanming Li/mouse_scRNAseq/mTmG_basal_angII/SeparateAnalysis/")
 
@@ -207,9 +175,39 @@ DimPlot(integrated, split.by = "Group", raster = T)
 
 
 ################################# basic visulize ####################################
+DimPlot(integrated, label = T, raster=T)
+integrated$Sample <- factor(integrated$Sample, levels=c("Saline.GFP", "Saline.RFP", "nonIMH.GFP", "nonIMH.RFP", "IMH.GFP", "IMH.RFP"))
+DimPlot(integrated, split.by = "Sample", raster = T)
+
+integrated$Lineage <- ifelse(integrated$Sample %in% c("Saline.GFP","nonIMH.GFP", "IMH.GFP"), "GFP", "RFP")
+
+meta <- integrated@meta.data
+meta <- meta %>% mutate(Group=case_when(
+  Sample %in% c("Saline.GFP", "Saline.RFP") ~ "Control",
+  Sample %in% c("nonIMH.GFP", "nonIMH.RFP") ~ "nonIMH",
+  Sample %in% c("IMH.GFP", "IMH.RFP") ~ "IMH"
+))
+integrated$Group <- meta$Group
+integrated$Group <- factor(integrated$Group, levels=c("Control","nonIMH","IMH"))
+
+integrated$SMC <- ifelse(integrated$seurat_clusters %in% c(1,3,4,6,7,8,9), "SMC", "Others")
+DimPlot(integrated, split.by = "orig.ident", group.by = "SMC", raster = T, cols = c("grey", "darkblue"))+NoLegend()
+
+integrated$SMC2 <- ifelse(integrated$seurat_clusters %in% c(1,3,4,6,7,8,9), 
+                          as.character(integrated$seurat_clusters), NA)
+integrated$SMC2 <- factor(integrated$SMC2, levels=c(1,3,4,6,7,8,9,NA))
+DimPlot(integrated, group.by = "SMC2", raster=T, label=T)
+DimPlot(integrated, group.by = "SMC2", raster=T, label=T, split.by = "Sample")
+
+FeaturePlot(integrated, features = c("Col1a2","Dcn", "S100a4","Pdgfra"), raster = T) #split.by = "Sample", 
+ggsave("Fig4_featurePlot_TFs_Sample.pdf", width = 16, height = 18)
+
+FeaturePlot(integrated, features = c("Nfia"), raster = T, split.by = "Sample") #, 
+ggsave("Fig4_featurePlot_TFs_Sample.pdf", width = 16, height = 18)
+
+
 DotPlot(integrated, features = c("Tph1", "Tph2","Ddc","Htr3a","Htr1a"))+coord_flip()+
   RotatedAxis() 
-
 
 VlnPlot(integrated, features = "nCount_RNA", pt.size = 0)+NoLegend()
 FeaturePlot(integrated, features = "Cd86", split.by = "Group", raster = T)
@@ -759,11 +757,6 @@ for (i in unique(categories$categories)){
   each_up_GO@result$Description <- str_remove(each_up_GO@result$Description, ",")
   write.csv(each_up_GO, paste0("GO_RFP_DEG_C",i,".csv"), quote=F)
 }
-
-
-
-
-
 
 ######################################### trajectory of GFP+ cells #############################################
 setwd("Z:/CT Surgery Lab/Yanming Li/mouse_scRNAseq/mTmG_Challenge/WithoutAngII3d/GFPtrajectory/")
